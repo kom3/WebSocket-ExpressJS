@@ -1,0 +1,70 @@
+<head>
+  <!-- socket.io CDN -->
+  <script
+    src="https://cdn.socket.io/4.6.0/socket.io.min.js"
+    integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+"
+    crossorigin="anonymous"
+  ></script>
+</head>
+
+<button id="connect_btn" onclick="connect()">Connect</button>
+<button onclick="disconnect()">Disconnect</button>
+
+<br /><br /><br />
+
+<input
+  type="text"
+  placeholder="Enter your message here..."
+  style="height: 50px"
+  id="msg"
+/>
+<button onclick="sendMessage()">Send message</button>
+
+<br /><br /><br /><br />
+
+<hr />
+<h3>Recieved messages from server :</h3>
+<hr />
+<div id="received_messages"></div>
+
+<!-- Minumum Javscript required to interact with server via web socket is below -->
+
+<script>
+  let websocket = null;
+
+  const connect = () => {
+    // io is from the socket.io library(CDN)
+    websocket = io("ws://localhost:3333");
+
+    // adding event listener to event:connection
+    websocket.on("connection", (event) => {
+      console.log("Connected to server...!");
+      document.getElementById("connect_btn").style.backgroundColor = "green";
+    });
+
+    // adding event listener to event:message(receive message from the server)
+    websocket.on("message", (message) => {
+      console.log("Message recieved from the server is: ", message);
+      const html_msg_ele = document.createElement("li");
+      html_msg_ele.innerText = message;
+
+      document.getElementById("received_messages").appendChild(html_msg_ele);
+    });
+  };
+
+  //send message to server
+
+  const sendMessage = () => {
+    const msg = document.getElementById("msg").value;
+    websocket.emit("message", msg);
+  };
+
+  //   disconnect
+  const disconnect = () => {
+    if (websocket) {
+      websocket.close();
+      console.log("Connection closed...!");
+      document.getElementById("connect_btn").style.backgroundColor = "red";
+    }
+  };
+</script>
